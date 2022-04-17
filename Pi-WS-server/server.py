@@ -18,7 +18,7 @@ settings = dict(
 #Tornado server port
 PORT = 80
 
-inter = CC.CCinterface("/dev/ttyACM0")
+inter = CC.CCinterface("/dev/ttyACM1")
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -34,18 +34,27 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
         print('[WS] Incoming message:' + message)
 
+        horse_stat = "No communication from horse"
+
         if message == "on_h":
             print("Sending on message to horse")
             inter.send(message)
             time.sleep(.1)
-            inter.receive()
+            horse_stat = inter.receive()
 
 
         if message == "off_h":
             print("Sending off message to horse")
             inter.send(message)
             time.sleep(.1)
-            inter.receive()
+            horse_stat = inter.receive()
+        
+        if message == "em_stop":
+            print("Sending emergency stop message to horse")
+            inter.send(message)
+            time.sleep(.1)
+            horse_stat = inter.receive()
+        self.write_message(horse_stat)
 
 
     def on_close(self):

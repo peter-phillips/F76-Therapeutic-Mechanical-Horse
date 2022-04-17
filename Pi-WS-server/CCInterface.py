@@ -13,3 +13,4 @@ class CCinterface():
         if self.clearCore.in_waiting > 0:
             line = self.clearCore.readline().decode('utf-8').rstrip()
             print("Incoming from ClearCore: " + line)
+            return line

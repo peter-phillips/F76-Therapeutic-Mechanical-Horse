@@ -16,6 +16,7 @@ $(document).ready(function(){
             };
 
         ws.onmessage = function(evt) {
+            $("#horse-status").html(evt.data);
             };
 
         ws.onclose = function(evt) {
@@ -26,8 +27,12 @@ $(document).ready(function(){
             ws.send("on_h");
             });
 
-        $("#green_off").click(function(){
+        $("#horse_off").click(function(){
             ws.send("off_h");
+            });
+        
+        $("#horse_em_stop").click(function(){
+            ws.send("em_stop");
             });
 
 
