@@ -18,7 +18,11 @@ settings = dict(
 #Tornado server port
 PORT = 80
 
-inter = CC.CCinterface("/dev/ttyACM1")
+# sudo nano /etc/udev/rules.d/99_usbdevices.rules
+# should contain 
+# SUBSYSTEM=="tty", ATTRS{idVendor}=="2890", ATTRS{idProduct}=="8022", SYMLINK+="clearCore"
+
+inter = CC.CCinterface("/dev/clearCore")
 
 
 class MainHandler(tornado.web.RequestHandler):
