@@ -15,8 +15,9 @@ settings = dict(
     template_path = os.path.join(os.path.dirname(__file__), "templates"),
     static_path = os.path.join(os.path.dirname(__file__), "static"))
 
-#Tornado server port
+#Tornado server port and listen address
 PORT = 80
+ADDRESS = "horse.local"
 
 # sudo nano /etc/udev/rules.d/99_usbdevices.rules
 # should contain 
@@ -29,6 +30,7 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         print("[HTTP](MainHandler) User Connected.")
         self.render("index.html")
+        print("rendered")
 
 
 class WSHandler(tornado.websocket.WebSocketHandler):
@@ -80,5 +82,6 @@ if __name__ == "__main__":
         print ("Tornado Server started")
         main_loop.start()
 
-    except:
+    except Exception as e:
         print ("Exception triggered - Tornado Server stopped.")
+        print (e)
