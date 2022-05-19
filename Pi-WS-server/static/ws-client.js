@@ -35,5 +35,9 @@ $(document).ready(function(){
             ws.send("em_stop");
             });
 
+        $("#horse_update_stat").click(function(){
+            ws.send("stat_h");
+            });
+
 
       });

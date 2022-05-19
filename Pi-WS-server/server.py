@@ -17,7 +17,6 @@ settings = dict(
 
 #Tornado server port and listen address
 PORT = 80
-ADDRESS = "horse.local"
 
 # sudo nano /etc/udev/rules.d/99_usbdevices.rules
 # should contain 
@@ -59,6 +58,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             print("Sending emergency stop message to horse")
             inter.send(message)
             time.sleep(.1)
+            horse_stat = inter.receive()
+        if message == "stat_h":
             horse_stat = inter.receive()
         self.write_message(horse_stat)
 
