@@ -15,3 +15,5 @@ class CCinterface():
             print("Incoming from ClearCore: " + line)
             return line
         return "No new status"
+    
+    

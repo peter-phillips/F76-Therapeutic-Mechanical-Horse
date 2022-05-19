@@ -25,6 +25,9 @@
  *
   */
 
+//NOTE:
+//POSITIVE RPM = CCW Rotation
+//NEGATIVE RPM = CW Rotation
 #include "ClearCore.h"
 
 // Defines the motor's connector as ConnectorM0
@@ -56,6 +59,8 @@ int ramp;
 float threshold;
 uint32_t onTime;
 
+//max index of time model
+#define TIME_SERIES_MAX_IDX 2
 
 //long fakeVolt[] = {1, -1, 2, -2, 3, -3, 5, -5, 6, -6, 10, -10};
 long fakeVolt[] = {9.9, -9.9, 9.9, -9.9, 9.9, -9.9, 9.9, -9.9, 9.9, -9.9, 9.9, -9.9};
@@ -89,6 +94,10 @@ void setup() {
     motorL.EnableRequest(true);
     motorR.EnableRequest(true);
     Serial.println("Motor Enabled");
+    //Set torque to limit 100% and command velocity to 0
+    motorR.MotorInBDuty(0);
+    motorL.MotorInBDuty(0);
+    LimitTorque(100);
     idx = 0;
     counter = 0;
     state = 0;
@@ -116,12 +125,17 @@ void loop() {
         motorL.EnableRequest(false);
         motorR.EnableRequest(false);
       }
+      else if(serialIn == "stat_h"){
+        //TODO
+      }
+      else if(serialIn == "home_test"){
+        Serial.println("Starting homing test");
+        Homing();
+        Serial.println("Homing test complete");
+      }
     }
     if(state == 1 && threshold < 1){
       threshold += .01;
-      Serial.print("threshold: ");
-      Serial.println(threshold);
-      
     }
     if(state == 0 && threshold > 0){
       threshold -= .01;
@@ -144,11 +158,9 @@ void loop() {
           static_cast<int32_t>(round(modelL[idx] * threshold));
   
       // Move at the commanded velocity.
-      Serial.println("Sending velocity");
-      Serial.println(commandedVelocityR);
       CommandVelocityL(commandedVelocityR);
       CommandVelocityR(commandedVelocityL);
-    }// See below for the detailed function definition.
+    }
     else{
       motorR.MotorInBDuty(0);
       motorL.MotorInBDuty(0);
@@ -162,7 +174,7 @@ void loop() {
  *    Prints the move status to the USB serial port
  *
  * Parameters:
- *    int commandedVelocity  - The velocity to command
+ *    int commandedVelocity  - The velocity to command in rpm
  *
  * Returns: True/False depending on whether the velocity was successfully
  * commanded.
@@ -185,7 +197,7 @@ bool CommandVelocityR(long commandedVelocity) {
     // Find the scaling factor of our velocity range mapped to the PWM duty cycle
     // range (the PWM to the ClearPath is bipolar, so the range starts at a 50%
     // duty cycle).
-    double scaleFactor = rangeUnsigned / maxVelocity;
+    double scaleFactor = rangeUnsigned / maxSpeed;
 
 
     // Scale the velocity command to our duty cycle range.
@@ -225,7 +237,7 @@ bool CommandVelocityL(long commandedVelocity) {
     // Find the scaling factor of our velocity range mapped to the PWM duty cycle
     // range (the PWM to the ClearPath is bipolar, so the range starts at a 50%
     // duty cycle).
-    double scaleFactor = rangeUnsigned / maxVelocity;
+    double scaleFactor = rangeUnsigned / maxSpeed;
 
 
     // Scale the velocity command to our duty cycle range.
@@ -281,32 +293,62 @@ String CheckSerial(){
     return "";
 }
 
-int ReadHlbfRight(){
+double ReadHlbfRight(){
     // Check the current state of the ClearPath's HLFB.
     MotorDriver::HlfbStates hlfbState = motorR.HlfbState();
 
     // Write the HLFB state to the serial port
     if (hlfbState == MotorDriver::HLFB_HAS_MEASUREMENT) {
         // Writes the torque measured, as a percent of motor peak torque rating
-        return int(round(motorR.HlfbPercent()));
+        return motorR.HlfbPercent();
     }
     else {
         return 0;
     }
 }
 
-int ReadHlbfLeft(){
+double ReadHlbfLeft(){
     // Check the current state of the ClearPath's HLFB.
     MotorDriver::HlfbStates hlfbState = motorL.HlfbState();
 
-    // Write the HLFB state to the serial port
     if (hlfbState == MotorDriver::HLFB_HAS_MEASUREMENT) {
         // Writes the torque measured, as a percent of motor peak torque rating
-        return int(round(motorL.HlfbPercent()));
+        return motorL.HlfbPercent();
     }
     else {
         return 0;
     }
+}
+
+//Homing both motors to center 
+void Homing(){
+  bool doneL = false;
+  bool doneR = false;
+  //limit torque to 5% of max
+  LimitTorque(5);
+
+  //slowly rotate motors inward
+  CommandVelocityL(16);
+  CommandVelocityR(-16);
+  
+  while (!doneL && !doneR){
+    if(ReadHlbfLeft() > 10){
+      CommandVelocityL(0);
+      doneL = true;
+    }
+    if(ReadHlbfRight() > 10){
+      CommandVelocityR(0);
+      doneR = true;
+    }
+  }
+
+  //start spinning motors back and reset torque delay to upright and stop
+  CommandVelocityL(-128);
+  CommandVelocityR(128);
+  LimitTorque(100);
+  delay(1800);
+  CommandVelocityL(0);
+  CommandVelocityR(0);
 }
 
 //------------------------------------------------------------------------------

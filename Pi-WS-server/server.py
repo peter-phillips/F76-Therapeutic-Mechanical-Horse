@@ -66,6 +66,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     def on_close(self):
         print ('[WS] Connection was closed.')
+        inter.send("off_h")
 
 
 application = tornado.web.Application([
