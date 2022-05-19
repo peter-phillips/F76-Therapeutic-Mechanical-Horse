@@ -59,6 +59,9 @@
 // Select the baud rate to match the target device.
 #define baudRate 9600
 
+#define timeSequenceTotalMS 1000
+#define TIME_SERIES_MAX_IDX 1
+
 // This is the commanded speed limit in RPM (must match the MSP value). This speed
 // cannot actually be commanded, so use something slightly higher than your real
 // max speed here and in MSP.
@@ -74,10 +77,14 @@ int counter;
 //0 = off
 int state;
 int ramp;
-long threshold;
+float threshold;
+uint32_t onTime;
 
 //long fakeVolt[] = {1, -1, 2, -2, 3, -3, 5, -5, 6, -6, 10, -10};
 long fakeVolt[] = {9.9, -9.9, 9.9, -9.9, 9.9, -9.9, 9.9, -9.9, 9.9, -9.9, 9.9, -9.9};
+long modelL[] = {200, -200};
+long modelR[] = {-200, 200};
+long modelTime[] = {500, 500};
 
 void setup() {
     // Put your setup code here, it will only run once:
@@ -116,7 +123,8 @@ void loop() {
       if(serialIn == "on_h"){
         state = 1;
         ramp = 1;
-        threshold = 0;
+        threshold = 0.001;
+        onTime = millis();
       }
       else if(serialIn == "off_h"){
         state = 0;
@@ -129,30 +137,34 @@ void loop() {
       }
     }
     if(state == 1 && threshold < 1){
-      threshold += .001;
+      threshold += .01;
+      Serial.print("threshold: ");
+      Serial.println(threshold);
+      
     }
     if(state == 0 && threshold > 0){
-      threshold -= .001;
+      threshold -= .01;
     }
     
     if(state == 1 || (state == 0 && threshold > 0)){
-      if(idx > 11){
+       if(millis() - onTime > modelTime[idx]){
+        idx += 1;
+        onTime = millis();
+      }
+      if(idx > TIME_SERIES_MAX_IDX){
         idx = 0;
       }
-      float analogVoltage = fakeVolt[idx];
-      if(counter >= 200){
-        idx++;
-        Serial.println(idx);
-        counter = 0;
-      }
-      counter++;
+      
+
       // Convert the voltage measured to a velocity within the valid range.
       long commandedVelocityR =
-          static_cast<int32_t>(round(analogVoltage / 10 * maxSpeed * threshold));
+          static_cast<int32_t>(round(modelR[idx] * threshold));
       long commandedVelocityL =
-          static_cast<int32_t>(round(analogVoltage / 10 * maxSpeed * threshold));
+          static_cast<int32_t>(round(modelL[idx] * threshold));
   
       // Move at the commanded velocity.
+      Serial.println("Sending velocity");
+      Serial.println(commandedVelocityR);
       CommandVelocityL(commandedVelocityR);
       CommandVelocityR(commandedVelocityL);
     }// See below for the detailed function definition.
