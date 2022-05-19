@@ -14,3 +14,4 @@ class CCinterface():
             line = self.clearCore.readline().decode('utf-8').rstrip()
             print("Incoming from ClearCore: " + line)
             return line
+        return "No new status"
