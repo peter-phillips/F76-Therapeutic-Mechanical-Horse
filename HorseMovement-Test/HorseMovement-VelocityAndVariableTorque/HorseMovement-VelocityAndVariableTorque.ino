@@ -45,11 +45,11 @@ double maxSpeed = 845;
 // Defines the default torque limit and the alternate torque limit
 // (must match MSP values)
 double torqueLimit = 100.0;
-double torqueLimitAlternate = 10.0;
+double torqueLimitAlternate = 5.0;
 
 // A PWM deadband of 2% prevents signal jitter from effecting a 0 RPM command
 // (must match MSP value)
-double pwmDeadBand = 2.0;
+double pwmDeadBand = 1.0;
 
 int idx;
 int counter;
@@ -64,8 +64,8 @@ uint32_t onTime;
 
 //long fakeVolt[] = {1, -1, 2, -2, 3, -3, 5, -5, 6, -6, 10, -10};
 long fakeVolt[] = {9.9, -9.9, 9.9, -9.9, 9.9, -9.9, 9.9, -9.9, 9.9, -9.9, 9.9, -9.9};
-long modelL[] = {200, -200};
-long modelR[] = {-200, 200};
+long modelL[] = {-128, 128};
+long modelR[] = {-128, 128};
 long modelTime[] = {500, 500};
 
 void setup() {
@@ -300,7 +300,8 @@ double ReadHlbfRight(){
     // Write the HLFB state to the serial port
     if (hlfbState == MotorDriver::HLFB_HAS_MEASUREMENT) {
         // Writes the torque measured, as a percent of motor peak torque rating
-        return motorR.HlfbPercent();
+        double percent = motorR.HlfbPercent();
+        return percent;
     }
     else {
         return 0;
@@ -313,7 +314,8 @@ double ReadHlbfLeft(){
 
     if (hlfbState == MotorDriver::HLFB_HAS_MEASUREMENT) {
         // Writes the torque measured, as a percent of motor peak torque rating
-        return motorL.HlfbPercent();
+        double percent = motorL.HlfbPercent();
+        return percent;
     }
     else {
         return 0;
@@ -322,31 +324,33 @@ double ReadHlbfLeft(){
 
 //Homing both motors to center 
 void Homing(){
-  bool doneL = false;
-  bool doneR = false;
+  bool nDoneL = true;
+  bool nDoneR = true;
   //limit torque to 5% of max
   LimitTorque(5);
 
   //slowly rotate motors inward
-  CommandVelocityL(16);
-  CommandVelocityR(-16);
+  CommandVelocityL(-16);
+  CommandVelocityR(16);
   
-  while (!doneL && !doneR){
-    if(ReadHlbfLeft() > 10){
+  while (nDoneL || nDoneR){
+    if(ReadHlbfLeft() < -2 && nDoneL){
       CommandVelocityL(0);
-      doneL = true;
+      Serial.println("left stopped");
+      nDoneL = false;
     }
-    if(ReadHlbfRight() > 10){
+    if(ReadHlbfRight() > 7 && nDoneR){
       CommandVelocityR(0);
-      doneR = true;
+      Serial.println("right stopped");
+      nDoneR = false;
     }
   }
 
   //start spinning motors back and reset torque delay to upright and stop
-  CommandVelocityL(-128);
-  CommandVelocityR(128);
+  CommandVelocityL(128);
+  CommandVelocityR(-128);
   LimitTorque(100);
-  delay(1800);
+  delay(1500);
   CommandVelocityL(0);
   CommandVelocityR(0);
 }
