@@ -353,9 +353,13 @@ double ReadHlfbLeft(){
 
 //Homing both motors to center 
 void Homing(){
+
+  bool toCenterL = true;
+  bool toCenterR = true;
   
   bool nDoneL = true;
   bool nDoneR = true;
+  
   //limit torque to 5% of max
   LimitTorque(5);
 
@@ -364,12 +368,21 @@ void Homing(){
   CommandVelocityR(16);
   
   while (nDoneL || nDoneR){
-    if(ReadHlfbLeft() < -3 && nDoneL){
+    
+    if(toCenterL && ReadHlfbLeft() > 0){
+      toCenterL = false;
+    }
+    
+    if(toCenterR && ReadHlfbLeft() < 0){
+      toCenterR = false;
+    }
+    
+    if(nDoneL && !toCenterL && ReadHlfbLeft() < -3){
       CommandVelocityL(0);
       Serial.println("left stopped");
       nDoneL = false;
     }
-    if(ReadHlfbRight() > 5 && nDoneR){
+    if(nDoneR && !toCenterR && ReadHlfbRight() > 5){
       CommandVelocityR(0);
       Serial.println("right stopped");
       nDoneR = false;
