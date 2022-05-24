@@ -1,5 +1,5 @@
  /* Requirements:
- * 1. A ClearPath motor must be connected to Connector M-0.
+ * 1. A ClearPath motor must be connected to Connector M-0 and M-1
  * 2. The connected ClearPath motor must be configured through the MSP software
  *    for Follow Digital Velocity Command, Bipolar PWM Command with Variable
  *    Torque mode (In MSP select Mode>>Velocity>>Follow Digital Velocity
@@ -7,8 +7,8 @@
  * 3. The ClearPath must have a defined Max Speed configured through the MSP
  *    software (On the main MSP window fill in the "Max Speed (RPM)" box with
  *    your desired maximum speed). Ensure the value of maxSpeed below matches
- *    this Max Speed.
- * 4. Set the PWM Deadband in MSP to 2.
+ *    this Max Speed. Max Speed of motors is 840
+ * 4. Set the PWM Deadband in MSP to 1.
  * 5. In MSP, ensure the two checkboxes for "Invert Torque PWM Input" and
  *    "Invert Speed PWM Input" are unchecked.
  * 6. A primary Torque Limit and Alternate Torque Limit must be defined using
@@ -16,7 +16,8 @@
  *    click the "Setup..." button found under the "Torque Limit" label. Then
  *    fill in the textbox labeled "Alt Torque Limit (% of max)" and hit the
  *    Apply button). Use only symmetric limits. These limits must match the
- *    "torqueLimit" and "torqueLimitAlternate" variables defined below.
+ *    "torqueLimit" and "torqueLimitAlternate" variables defined below. Torque
+ *    limit should be 100% and alternate should be 5% for homing.
  * 7. The connected ClearPath motor must have its HLFB mode set to ASG with
  *    measured torque through the MSP software (select Advanced>>High Level
  *    Feedback [Mode]... then choose "ASG-Position, w/Measured Torque" or
@@ -62,12 +63,13 @@ uint32_t onTime;
 //max index of time model
 #define TIME_SERIES_MAX_IDX 2
 
-//long fakeVolt[] = {1, -1, 2, -2, 3, -3, 5, -5, 6, -6, 10, -10};
-long fakeVolt[] = {9.9, -9.9, 9.9, -9.9, 9.9, -9.9, 9.9, -9.9, 9.9, -9.9, 9.9, -9.9};
+// RPM of L and right motor from model
 long modelL[] = {-128, 128};
 long modelR[] = {-128, 128};
+//duration in MS of corresponding RMP idx
 long modelTime[] = {500, 500};
 
+// Called once on ClearCore boot
 void setup() {
    
     // Sets all motor connectors to the correct mode for Follow Digital
@@ -98,9 +100,10 @@ void setup() {
     motorR.MotorInBDuty(0);
     motorL.MotorInBDuty(0);
     LimitTorque(100);
+    //Set up intial variables
     idx = 0;
     counter = 0;
-    state = 0;
+    state = -1;
     ramp = 0;
     threshold = 0;
 }
@@ -108,50 +111,67 @@ void setup() {
 
 void loop() {
     // Read the voltage on the analog sensor (0-10V).
+    if(state == -1){
+        Serial.println("Starting homing");
+        Homing();
+        Serial.println("Homing complete");
+        state = 0;
+    }
+    //Checks Serial for new message
     String serialIn = CheckSerial();
+    // Serial available and not in EM STOP MODE
     if(serialIn != "" && state != 2){
+      //Set to start ramping up horse to full speed 
       if(serialIn == "on_h"){
         state = 1;
         ramp = 1;
         threshold = 0.001;
         onTime = millis();
       }
+      // Set to start ramping down horse
       else if(serialIn == "off_h"){
         state = 0;
       }
+      // Set to 
       else if(serialIn == "em_stop"){
         state = 2;
         threshold = 0;
         motorL.EnableRequest(false);
         motorR.EnableRequest(false);
       }
+      //Print status of horse to Serial
       else if(serialIn == "stat_h"){
-        //TODO
+        PrintStatus();
       }
+      //manual test of homing sequence
       else if(serialIn == "home_test"){
         Serial.println("Starting homing test");
         Homing();
         Serial.println("Homing test complete");
       }
     }
+    // Ramp up threshold to provide smooth start to movement
     if(state == 1 && threshold < 1){
       threshold += .01;
     }
+    // Ramp down threshold to provide smooth stop to movement
     if(state == 0 && threshold > 0){
       threshold -= .01;
     }
-    
+
+    // If horse on or off in ramp down
     if(state == 1 || (state == 0 && threshold > 0)){
        if(millis() - onTime > modelTime[idx]){
         idx += 1;
         onTime = millis();
       }
+      // IDX rap around
       if(idx > TIME_SERIES_MAX_IDX){
         idx = 0;
       }
       
 
-      // Convert the voltage measured to a velocity within the valid range.
+      // new RPM with threshold factored
       long commandedVelocityR =
           static_cast<int32_t>(round(modelR[idx] * threshold));
       long commandedVelocityL =
@@ -161,6 +181,7 @@ void loop() {
       CommandVelocityL(commandedVelocityR);
       CommandVelocityR(commandedVelocityL);
     }
+    // If off hold motors in position
     else{
       motorR.MotorInBDuty(0);
       motorL.MotorInBDuty(0);
@@ -171,7 +192,6 @@ void loop() {
  * CommandVelocity
  *
  *    Command the motor to move using a velocity of commandedVelocity
- *    Prints the move status to the USB serial port
  *
  * Parameters:
  *    int commandedVelocity  - The velocity to command in rpm
@@ -283,6 +303,7 @@ bool LimitTorque(double limit) {
     return true;
 }
 
+//Checks Serial for new messages from Raspberry pi
 String CheckSerial(){
     if (Serial.available() > 0) {
       String data = Serial.readStringUntil('\n');
@@ -293,7 +314,8 @@ String CheckSerial(){
     return "";
 }
 
-double ReadHlbfRight(){
+//Read HLFB of right motor, returns percent of torque or 0 if no torque read
+double ReadHlfbRight(){
     // Check the current state of the ClearPath's HLFB.
     MotorDriver::HlfbStates hlfbState = motorR.HlfbState();
 
@@ -307,8 +329,8 @@ double ReadHlbfRight(){
         return 0;
     }
 }
-
-double ReadHlbfLeft(){
+//Read HLFB of left motor, returns percent of torque or 0 if no torque read
+double ReadHlfbLeft(){
     // Check the current state of the ClearPath's HLFB.
     MotorDriver::HlfbStates hlfbState = motorL.HlfbState();
 
@@ -334,12 +356,12 @@ void Homing(){
   CommandVelocityR(16);
   
   while (nDoneL || nDoneR){
-    if(ReadHlbfLeft() < -2 && nDoneL){
+    if(ReadHlfbLeft() < -3 && nDoneL){
       CommandVelocityL(0);
       Serial.println("left stopped");
       nDoneL = false;
     }
-    if(ReadHlbfRight() > 7 && nDoneR){
+    if(ReadHlfbRight() > 5 && nDoneR){
       CommandVelocityR(0);
       Serial.println("right stopped");
       nDoneR = false;
@@ -353,6 +375,30 @@ void Homing(){
   delay(1500);
   CommandVelocityL(0);
   CommandVelocityR(0);
+}
+
+// Prints current status of horse to Serial
+void PrintStatus(){
+  if(state == 1 && threshold < 1){
+    Serial.println("Horse is on and ramping to full speed");
+    return;
+  }
+  if(state == 1 && threshold == 1){
+    Serial.println("Horse is on and at full speed");
+    return;
+  }
+  if(state == 0 && threshold > 0){
+    Serial.println("Horse is ramping down to a stop");
+    return;
+  }
+  if(state == 0 && threshold == 0){
+    Serial.println("Horse is off and ready");
+    return;
+  }
+  if(state == 2){
+    Serial.println("Emergency Stop was triggered on Horse, please cycle power on horse when safe to do so");
+    return;
+  }
 }
 
 //------------------------------------------------------------------------------
