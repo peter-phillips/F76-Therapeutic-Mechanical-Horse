@@ -1,16 +1,22 @@
  /* Requirements:
+  *  
  * 1. A ClearPath motor must be connected to Connector M-0 and M-1
+ * 
  * 2. The connected ClearPath motor must be configured through the MSP software
  *    for Follow Digital Velocity Command, Bipolar PWM Command with Variable
  *    Torque mode (In MSP select Mode>>Velocity>>Follow Digital Velocity
  *    Command, then with "Bipolar PWM Command w/ Variable Torque")
+ *    
  * 3. The ClearPath must have a defined Max Speed configured through the MSP
  *    software (On the main MSP window fill in the "Max Speed (RPM)" box with
  *    your desired maximum speed). Ensure the value of maxSpeed below matches
  *    this Max Speed. Max Speed of motors is 840
+ *    
  * 4. Set the PWM Deadband in MSP to 1.
+ * 
  * 5. In MSP, ensure the two checkboxes for "Invert Torque PWM Input" and
  *    "Invert Speed PWM Input" are unchecked.
+ *    
  * 6. A primary Torque Limit and Alternate Torque Limit must be defined using
  *    the Torque Limit setup window through the MSP software (To configure,
  *    click the "Setup..." button found under the "Torque Limit" label. Then
@@ -18,6 +24,7 @@
  *    Apply button). Use only symmetric limits. These limits must match the
  *    "torqueLimit" and "torqueLimitAlternate" variables defined below. Torque
  *    limit should be 100% and alternate should be 5% for homing.
+ *    
  * 7. The connected ClearPath motor must have its HLFB mode set to ASG with
  *    measured torque through the MSP software (select Advanced>>High Level
  *    Feedback [Mode]... then choose "ASG-Position, w/Measured Torque" or
@@ -346,6 +353,7 @@ double ReadHlfbLeft(){
 
 //Homing both motors to center 
 void Homing(){
+  
   bool nDoneL = true;
   bool nDoneR = true;
   //limit torque to 5% of max

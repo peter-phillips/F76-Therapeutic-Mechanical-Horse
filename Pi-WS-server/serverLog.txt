@@ -1,0 +1,32 @@
+13:17:05,804 asyncio DEBUG Using selector: KqueueSelector
+13:17:05,804 asyncio INFO Tornado Server started
+13:17:18,17 tornado.access INFO 200 GET / (::1) 7.98ms
+13:17:18,36 tornado.access INFO 200 GET /static/jquery-1.8.3.min.js?v=435e410081ebc6e7944053f536aab3da711106791dab43a4c9468a61e013737689abfaccbeab1cb248abefb5764c56e76de5246b3f80021f9639917d47c8cfa9 (::1) 8.45ms
+13:17:18,38 tornado.access INFO 200 GET /static/ws-client.js?v=175ed222241eedbdead9fee2810bc983e70f77ae770458ff70cb3497793b46d35270b9c0df48b479c80b162762a20d943248074ec73f83f55dbdcc8513ab34cf (::1) 1.26ms
+13:17:18,66 tornado.access INFO 101 GET /ws (::1) 2.06ms
+13:17:18,66 asyncio INFO [WS] Connection was opened.
+13:17:18,83 tornado.access WARNING 404 GET /favicon.ico (::1) 0.59ms
+13:17:27,736 asyncio INFO [WS] Incoming message:on_h
+13:17:27,736 asyncio INFO Sending on message to horse
+13:17:29,679 asyncio INFO [WS] Incoming message:off_h
+13:17:29,684 asyncio INFO Sending off message to horse
+13:17:30,621 asyncio INFO [WS] Incoming message:stat_h
+13:17:31,605 asyncio INFO [WS] Incoming message:em_stop
+13:17:31,605 asyncio INFO Sending emergency stop message to horse
+13:17:32,119 asyncio INFO [WS] Incoming message:off_h
+13:17:32,120 asyncio INFO Sending off message to horse
+13:17:39,375 asyncio INFO [WS] Connection was closed.
+13:19:08,609 asyncio DEBUG Using selector: KqueueSelector
+13:19:08,610 asyncio INFO Tornado Server started
+13:19:20,570 tornado.access INFO 304 GET / (::1) 2.90ms
+13:19:20,584 tornado.access INFO 101 GET /ws (::1) 0.29ms
+13:19:20,584 asyncio INFO [WS] Connection was opened.
+13:19:36,128 asyncio INFO [WS] Incoming message:on_h
+13:19:36,131 asyncio INFO Sending on message to horse
+13:19:44,858 asyncio INFO [WS] Incoming message:stat_h
+13:19:45,421 asyncio INFO [WS] Incoming message:stat_h
+13:19:45,737 asyncio INFO [WS] Incoming message:stat_h
+13:19:49,537 asyncio INFO [WS] Incoming message:off_h
+13:19:49,538 asyncio INFO Sending off message to horse
+13:19:50,80 asyncio INFO [WS] Incoming message:on_h
+13:19:50,81 asyncio INFO Sending on message to horse

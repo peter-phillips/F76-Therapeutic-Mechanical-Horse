@@ -1,13 +1,22 @@
 #! /usr/bin/python
 
+from asyncio.log import logger
 import os.path
 import tornado.httpserver
 import tornado.websocket
 import tornado.ioloop
 import tornado.web
+import logging
 
 import CCInterface as CC
 import time
+
+# Logging config
+logging.basicConfig(filename="serverLog.txt",
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
 
 
 #Tornado Folder Paths
@@ -39,10 +48,12 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     # On open only print to log
     def open(self):
         print ('[WS] Connection was opened.')
+        logger.info('[WS] Connection was opened.')
 
     # On message switch on message and send to ClearCore through CCinterface
     def on_message(self, message):
         print('[WS] Incoming message:' + message)
+        logger.info('[WS] Incoming message:' + message)
 
         # Default return message
         horse_stat = "No communication from horse"
@@ -50,6 +61,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         # Message on_h turns on horse
         if message == "on_h":
             print("Sending on message to horse")
+            logger.info("Sending on message to horse")
             inter.send(message)
             time.sleep(.1)
             horse_stat = inter.receive()
@@ -57,6 +69,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         # Message off_h turns off horse
         if message == "off_h":
             print("Sending off message to horse")
+            logger.info("Sending off message to horse")
             inter.send(message)
             time.sleep(.1)
             horse_stat = inter.receive()
@@ -64,6 +77,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         # Message em_stop turns off horse immediately, disables motors and wait for power cycle to turn back on 
         if message == "em_stop":
             print("Sending emergency stop message to horse")
+            logger.info("Sending emergency stop message to horse")
             inter.send(message)
             time.sleep(.1)
             horse_stat = inter.receive()
@@ -80,6 +94,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     # on close of web socket send turn off signal to horse
     def on_close(self):
         print ('[WS] Connection was closed.')
+        logger.info('[WS] Connection was closed.')
         inter.send("off_h")
 
 
@@ -96,8 +111,11 @@ if __name__ == "__main__":
         main_loop = tornado.ioloop.IOLoop.instance()
 
         print ("Tornado Server started")
+        logger.info("Tornado Server started")
         main_loop.start()
 
     except Exception as e:
         print ("Exception triggered - Tornado Server stopped.")
         print (e)
+        logger.info("Exception triggered - Tornado Server stopped.")
+        logger.info(e)
