@@ -59,22 +59,30 @@ double torqueLimitAlternate = 5.0;
 // (must match MSP value)
 double pwmDeadBand = 1.0;
 
-int idx;
+int idxL;
+int idxR;
 int counter;
 //0 = off
 int state;
 int ramp;
 float threshold;
-uint32_t onTime;
+uint32_t onTimeL;
+uint32_t onTimeR;
 
 //max index of time model
-#define TIME_SERIES_MAX_IDX 2
+#define TIME_SERIES_MAX_IDX 4
 
 // RPM of L and right motor from model
-long modelL[] = {-128, 128};
-long modelR[] = {-128, 128};
-//duration in MS of corresponding RMP idx
-long modelTime[] = {500, 500};
+//long modelL[] = {50, 100, 50, -50, -100, -50, 25, -25, 25, -25};
+//long modelR[] = {25, -25, 25, -25, -50, -100, -50, 50, 100, 50};
+////duration in MS of corresponding RMP idx
+//long modelTimeL[] = {300, 400, 300, 400, 400, 300, 200, 200, 200, 200};
+//long modelTimeR[] = {200, 200, 200, 200, 300, 400, 200, 300, 400, 300};
+
+long modelL[] = {-55, 50, -55, 50};
+long modelR[] = {-50, 50, -50, 50};
+long modelTimeL[] = {500, 500, 500, 500};
+long modelTimeR[] = {500, 500, 500, 500};
 
 // Called once on ClearCore boot
 void setup() {
@@ -108,7 +116,8 @@ void setup() {
     motorL.MotorInBDuty(0);
     LimitTorque(100);
     //Set up intial variables
-    idx = 0;
+    idxL = 0;
+    idxR = 0;
     counter = 0;
     state = -1;
     ramp = 0;
@@ -119,9 +128,9 @@ void setup() {
 void loop() {
     // Read the voltage on the analog sensor (0-10V).
     if(state == -1){
-        Serial.println("Starting homing");
-        Homing();
-        Serial.println("Homing complete");
+//        Serial.println("Starting homing");
+//        Homing();
+//        Serial.println("Homing complete");
         state = 0;
     }
     //Checks Serial for new message
@@ -132,8 +141,9 @@ void loop() {
       if(serialIn == "on_h"){
         state = 1;
         ramp = 1;
-        threshold = 0.001;
-        onTime = millis();
+        threshold = 1;
+        onTimeR = millis();
+        onTimeL = millis();
       }
       // Set to start ramping down horse
       else if(serialIn == "off_h"){
@@ -156,6 +166,14 @@ void loop() {
         Homing();
         Serial.println("Homing test complete");
       }
+      else if (serialIn == "enable"){
+        motorL.EnableRequest(true);
+        motorR.EnableRequest(true);
+      }
+      else if (serialIn == "disable"){
+        motorL.EnableRequest(false);
+        motorR.EnableRequest(false);
+      }
     }
     // Ramp up threshold to provide smooth start to movement
     if(state == 1 && threshold < 1){
@@ -168,25 +186,36 @@ void loop() {
 
     // If horse on or off in ramp down
     if(state == 1 || (state == 0 && threshold > 0)){
-       if(millis() - onTime > modelTime[idx]){
-        idx += 1;
-        onTime = millis();
+       if(millis() - onTimeR > modelTimeR[idxR]){
+        idxR += 1;
+        onTimeR = millis();
+        
       }
       // IDX rap around
-      if(idx > TIME_SERIES_MAX_IDX){
-        idx = 0;
+      if(idxR > TIME_SERIES_MAX_IDX){
+        idxR = 0;
+      }
+
+      if(millis() - onTimeL > modelTimeL[idxL]){
+        idxL += 1;
+        onTimeL = millis();
+        
+      }
+      // IDX rap around
+      if(idxL > TIME_SERIES_MAX_IDX){
+        idxL = 0;
       }
       
 
       // new RPM with threshold factored
       long commandedVelocityR =
-          static_cast<int32_t>(round(modelR[idx] * threshold));
+          static_cast<int32_t>(round(modelR[idxR] * threshold));
       long commandedVelocityL =
-          static_cast<int32_t>(round(modelL[idx] * threshold));
+          static_cast<int32_t>(round(modelL[idxL] * threshold));
   
       // Move at the commanded velocity.
-      CommandVelocityL(commandedVelocityR);
-      CommandVelocityR(commandedVelocityL);
+      CommandVelocityL(commandedVelocityL);
+      CommandVelocityR(commandedVelocityR);
     }
     // If off hold motors in position
     else{
@@ -215,6 +244,7 @@ bool CommandVelocityR(long commandedVelocity) {
     // Check if an alert is currently preventing motion
     if (motorR.StatusReg().bit.AlertsPresent) {
         Serial.println("Motor right status: 'In Alert'. Move Canceled.");
+        motorR.MotorInBDuty(0);
         return false;
     }
 
@@ -255,6 +285,7 @@ bool CommandVelocityL(long commandedVelocity) {
     // Check if an alert is currently preventing motion
     if (motorL.StatusReg().bit.AlertsPresent) {
         Serial.println("Motor Left status: 'In Alert'. Move Canceled.");
+        motorL.MotorInBDuty(0);
         return false;
     }
 
@@ -329,8 +360,7 @@ double ReadHlfbRight(){
     // Write the HLFB state to the serial port
     if (hlfbState == MotorDriver::HLFB_HAS_MEASUREMENT) {
         // Writes the torque measured, as a percent of motor peak torque rating
-        double percent = motorR.HlfbPercent();
-        return percent;
+        return motorR.HlfbPercent();
     }
     else {
         return 0;
@@ -343,8 +373,7 @@ double ReadHlfbLeft(){
 
     if (hlfbState == MotorDriver::HLFB_HAS_MEASUREMENT) {
         // Writes the torque measured, as a percent of motor peak torque rating
-        double percent = motorL.HlfbPercent();
-        return percent;
+        return motorL.HlfbPercent();
     }
     else {
         return 0;
@@ -354,39 +383,51 @@ double ReadHlfbLeft(){
 //Homing both motors to center 
 void Homing(){
 
-  bool toCenterL = true;
-  bool toCenterR = true;
+  bool toCenterL = false;
+  bool toCenterR = false;
   
   bool nDoneL = true;
   bool nDoneR = true;
   
-  //limit torque to 5% of max
-  LimitTorque(5);
+  //limit torque to 10% of max
+  LimitTorque(10);
 
-  //slowly rotate motors inward
-  CommandVelocityL(-16);
-  CommandVelocityR(16);
+  //slowly rotate motors outward
+  CommandVelocityL(-32);
+  CommandVelocityR(32);
   
   while (nDoneL || nDoneR){
     
-    if(toCenterL && ReadHlfbLeft() > 0){
-      toCenterL = false;
-    }
-    
-    if(toCenterR && ReadHlfbLeft() < 0){
-      toCenterR = false;
-    }
-    
-    if(nDoneL && !toCenterL && ReadHlfbLeft() < -3){
+//    if(toCenterL && ReadHlfbLeft() < 2){
+//      toCenterL = false;
+//      Serial.print("L CENTER: ");
+//      Serial.println(ReadHlfbLeft());
+//    }
+//    
+//    if(toCenterR && ReadHlfbRight() < 2){
+//      toCenterR = false;
+//      Serial.print("R CENTER: ");
+//      Serial.println(ReadHlfbRight());
+//    }
+//    if (toCenterR && ReadHlfbRight() < 2.5){
+//      Serial.println(ReadHlfbRight());
+//    }
+    Serial.println(ReadHlfbLeft());
+    if(nDoneL && !toCenterL && ReadHlfbLeft() < -2){
       CommandVelocityL(0);
-      Serial.println("left stopped");
+      Serial.print("left stopped: ");
+      Serial.println(ReadHlfbLeft());
       nDoneL = false;
     }
-    if(nDoneR && !toCenterR && ReadHlfbRight() > 5){
+    if(nDoneR && !toCenterR && ReadHlfbRight() > 2){
       CommandVelocityR(0);
-      Serial.println("right stopped");
+      Serial.print("right stopped: ");
+      Serial.println(ReadHlfbRight());
       nDoneR = false;
     }
+//    if(nDoneL && !toCenterL){
+//      Serial.println(ReadHlfbLeft());
+//    }
   }
 
   //start spinning motors back and reset torque delay to upright and stop

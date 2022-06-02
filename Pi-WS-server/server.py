@@ -84,7 +84,6 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         
         # Message stat_h retrieves current status of the horse
         if message == "stat_h":
-            horse_stat = inter.receive()
             inter.send(message)
             time.sleep(.1)
             horse_stat = inter.receive(True)

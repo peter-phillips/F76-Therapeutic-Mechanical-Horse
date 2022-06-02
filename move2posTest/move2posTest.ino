@@ -1,37 +1,3 @@
- /* Requirements:
-  *  
- * 1. A ClearPath motor must be connected to Connector M-0 and M-1
- * 
- * 2. The connected ClearPath motor must be configured through the MSP software
- *    for Follow Digital Velocity Command, Bipolar PWM Command with Variable
- *    Torque mode (In MSP select Mode>>Velocity>>Follow Digital Velocity
- *    Command, then with "Bipolar PWM Command w/ Variable Torque")
- *    
- * 3. The ClearPath must have a defined Max Speed configured through the MSP
- *    software (On the main MSP window fill in the "Max Speed (RPM)" box with
- *    your desired maximum speed). Ensure the value of maxSpeed below matches
- *    this Max Speed. Max Speed of motors is 840
- *    
- * 4. Set the PWM Deadband in MSP to 1.
- * 
- * 5. In MSP, ensure the two checkboxes for "Invert Torque PWM Input" and
- *    "Invert Speed PWM Input" are unchecked.
- *    
- * 6. A primary Torque Limit and Alternate Torque Limit must be defined using
- *    the Torque Limit setup window through the MSP software (To configure,
- *    click the "Setup..." button found under the "Torque Limit" label. Then
- *    fill in the textbox labeled "Alt Torque Limit (% of max)" and hit the
- *    Apply button). Use only symmetric limits. These limits must match the
- *    "torqueLimit" and "torqueLimitAlternate" variables defined below. Torque
- *    limit should be 100% and alternate should be 5% for homing.
- *    
- * 7. The connected ClearPath motor must have its HLFB mode set to ASG with
- *    measured torque through the MSP software (select Advanced>>High Level
- *    Feedback [Mode]... then choose "ASG-Position, w/Measured Torque" or
- *    "ASG-Velocity, w/ Measured Torque" and hit the OK button).
- *    Select a 482 Hz PWM Carrier Frequency in this menu.
- *
-  */
 
 //NOTE:
 //POSITIVE RPM = CCW Rotation
@@ -79,6 +45,8 @@ void setup() {
     while (!Serial && millis() - startTime < timeout) {
         continue;
     }
+    Serial.println("active");
+    state = -1;
 }
 
 
@@ -98,11 +66,13 @@ void loop() {
       if(serialIn == "on_h"){
         state = 1;
         onTimeL = millis();
-        onTimeR = millis() + 500;
+        onTimeR = millis() + 1000;
       }
       // Set to start ramping down horse
       else if(serialIn == "off_h"){
         state = 0;
+        motorL.MotorInAState(false);
+        motorR.MotorInAState(false);
       }
       // Set to 
       else if(serialIn == "em_stop"){
@@ -118,6 +88,7 @@ void loop() {
       else if(serialIn == "home_test"){
         motorL.EnableRequest(false);
         motorR.EnableRequest(false);
+        delay(100);
         Serial.println("Starting homing test");
         Homing();
         Serial.println("Homing test complete");
@@ -128,9 +99,11 @@ void loop() {
     if(state == 1){
       if(millis() - onTimeL > switchTime){
         MoveToPositionL();
+        onTimeL = millis();
       }
       if(millis() - onTimeR > switchTime){
-        MoveToPositionR() ;
+        MoveToPositionR();
+        onTimeR = millis();
       }
     }
 }
@@ -147,9 +120,11 @@ bool MoveToPositionR() {
 
     if (Rpos == 1){
       positionNum = 2;
-    }
+      Rpos = 2;
+    } 
     else{
       positionNum = 1;
+      Rpos = 1;
     }
 
     switch (positionNum) {
@@ -182,9 +157,11 @@ bool MoveToPositionL() {
 
     if (Lpos == 1){
       positionNum = 2;
+      Lpos = 2;
     }
     else{
       positionNum = 1;
+      Lpos = 1;
     }
 
     switch (positionNum) {
@@ -213,8 +190,6 @@ bool MoveToPositionL() {
 String CheckSerial(){
     if (Serial.available() > 0) {
       String data = Serial.readStringUntil('\n');
-      Serial.print("You sent me: ");
-      Serial.println(data);
       return data;
     }
     return "";
@@ -228,9 +203,8 @@ double ReadHlfbRight(){
     // Write the HLFB state to the serial port
     if (hlfbState == MotorDriver::HLFB_HAS_MEASUREMENT) {
         // Writes the torque measured, as a percent of motor peak torque rating
-        double percent = motorR.HlfbPercent();
-        return percent;
-    }
+        return motorR.HlfbPercent();    
+        }
     else {
         return 0;
     }
@@ -242,8 +216,7 @@ double ReadHlfbLeft(){
 
     if (hlfbState == MotorDriver::HLFB_HAS_MEASUREMENT) {
         // Writes the torque measured, as a percent of motor peak torque rating
-        double percent = motorL.HlfbPercent();
-        return percent;
+        return motorL.HlfbPercent();
     }
     else {
         return 0;
@@ -270,16 +243,23 @@ void Homing(){
 //  CommandVelocityR(16);
   
   while (nDoneL || nDoneR){
-    if(nDoneL && ReadHlfbLeft() < -3){
+    if(nDoneL && ReadHlfbLeft() < -4){
       Serial.print("left stopped");
       Serial.println(ReadHlfbRight());
       motorL.MotorInBState(true);
+      motorL.MotorInAState(false);
+      delay(100);
+      motorL.MotorInBState(false);
       nDoneL = false;
     }
-    if(nDoneR && ReadHlfbRight() > 5){
+    Serial.println(ReadHlfbRight());
+    if(nDoneR && ReadHlfbRight() > 7.2){
       Serial.print("right stopped");
       Serial.println(ReadHlfbRight());
       motorR.MotorInBState(true);
+      motorR.MotorInAState(false); 
+      delay(100);
+      motorR.MotorInBState(false);
       nDoneR = false;
     }
   }

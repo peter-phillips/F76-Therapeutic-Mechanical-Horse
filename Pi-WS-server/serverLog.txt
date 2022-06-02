@@ -30,3 +30,349 @@
 13:19:49,538 asyncio INFO Sending off message to horse
 13:19:50,80 asyncio INFO [WS] Incoming message:on_h
 13:19:50,81 asyncio INFO Sending on message to horse
+15:22:27,527 asyncio INFO Exception triggered - Tornado Server stopped.
+15:22:27,531 asyncio INFO [Errno 13] Permission denied
+15:22:37,710 asyncio INFO Exception triggered - Tornado Server stopped.
+15:22:37,710 asyncio INFO [Errno 98] Address already in use
+15:28:43,801 asyncio INFO Exception triggered - Tornado Server stopped.
+15:28:43,801 asyncio INFO [Errno 98] Address already in use
+15:28:56,169 asyncio INFO Exception triggered - Tornado Server stopped.
+15:28:56,169 asyncio INFO [Errno 98] Address already in use
+15:29:38,396 asyncio DEBUG Using selector: EpollSelector
+15:29:38,399 asyncio INFO Tornado Server started
+15:30:07,377 tornado.access INFO 200 GET / (192.168.50.10) 28.64ms
+15:30:07,422 tornado.access INFO 200 GET /static/ws-client.js?v=5915ae617a8b0f0eac1268726e031ca0 (192.168.50.10) 3.87ms
+15:30:07,437 tornado.access INFO 200 GET /static/jquery-1.8.3.min.js?v=24bd97b1de158c4f1a162336eeca4aa6 (192.168.50.10) 52.03ms
+15:30:07,473 tornado.access INFO 101 GET /ws (192.168.50.10) 1.89ms
+15:30:07,474 asyncio INFO [WS] Connection was opened.
+15:30:07,510 tornado.access WARNING 404 GET /favicon.ico (192.168.50.10) 1.64ms
+15:30:11,654 asyncio INFO [WS] Incoming message:off_h
+15:30:11,654 asyncio INFO Sending off message to horse
+15:30:16,58 asyncio INFO [WS] Incoming message:stat_h
+15:30:20,613 asyncio INFO [WS] Incoming message:stat_h
+15:30:24,237 asyncio INFO [WS] Incoming message:stat_h
+15:30:29,487 asyncio INFO [WS] Incoming message:on_h
+15:30:29,488 asyncio INFO Sending on message to horse
+15:30:35,343 asyncio INFO [WS] Incoming message:off_h
+15:30:35,343 asyncio INFO Sending off message to horse
+15:30:44,538 asyncio INFO [WS] Incoming message:on_h
+15:30:44,538 asyncio INFO Sending on message to horse
+15:30:52,354 asyncio INFO [WS] Incoming message:off_h
+15:30:52,355 asyncio INFO Sending off message to horse
+15:30:55,919 asyncio INFO [WS] Incoming message:on_h
+15:30:55,920 asyncio INFO Sending on message to horse
+15:31:33,40 asyncio INFO [WS] Incoming message:off_h
+15:31:33,41 asyncio INFO Sending off message to horse
+15:31:39,756 asyncio INFO [WS] Incoming message:stat_h
+15:31:40,874 asyncio INFO [WS] Incoming message:stat_h
+15:31:41,914 asyncio INFO [WS] Incoming message:stat_h
+15:33:44,62 asyncio INFO [WS] Connection was closed.
+15:33:44,63 tornado.application ERROR Uncaught exception, closing connection.
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 537, in write
+    n = os.write(self.fd, d)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/tornado/iostream.py", line 752, in wrapper
+    return callback(*args)
+  File "/usr/lib/python3/dist-packages/tornado/stack_context.py", line 300, in null_wrapper
+    return fn(*args, **kwargs)
+  File "/usr/lib/python3/dist-packages/tornado/websocket.py", line 488, in on_connection_close
+    self.on_close()
+  File "server.py", line 98, in on_close
+    inter.send("off_h")
+  File "/home/pi/Desktop/F76-Therapeutic-Mechanical-Horse/Pi-WS-server/CCInterface.py", line 17, in send
+    self.clearCore.write(bytes(message + '\n', 'utf-8'))
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 571, in write
+    raise SerialException('write failed: {}'.format(e))
+serial.serialutil.SerialException: write failed: [Errno 5] Input/output error
+15:33:44,84 tornado.application ERROR Exception in callback functools.partial(<function wrap.<locals>.null_wrapper at 0xb5d2a588>)
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 537, in write
+    n = os.write(self.fd, d)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/tornado/ioloop.py", line 758, in _run_callback
+    ret = callback()
+  File "/usr/lib/python3/dist-packages/tornado/stack_context.py", line 300, in null_wrapper
+    return fn(*args, **kwargs)
+  File "/usr/lib/python3/dist-packages/tornado/iostream.py", line 752, in wrapper
+    return callback(*args)
+  File "/usr/lib/python3/dist-packages/tornado/stack_context.py", line 300, in null_wrapper
+    return fn(*args, **kwargs)
+  File "/usr/lib/python3/dist-packages/tornado/websocket.py", line 488, in on_connection_close
+    self.on_close()
+  File "server.py", line 98, in on_close
+    inter.send("off_h")
+  File "/home/pi/Desktop/F76-Therapeutic-Mechanical-Horse/Pi-WS-server/CCInterface.py", line 17, in send
+    self.clearCore.write(bytes(message + '\n', 'utf-8'))
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 571, in write
+    raise SerialException('write failed: {}'.format(e))
+serial.serialutil.SerialException: write failed: [Errno 5] Input/output error
+15:34:29,1 tornado.access INFO 200 GET / (192.168.50.10) 3.28ms
+15:34:29,44 tornado.access INFO 101 GET /ws (192.168.50.10) 2.11ms
+15:34:29,45 asyncio INFO [WS] Connection was opened.
+15:34:30,893 asyncio INFO [WS] Incoming message:stat_h
+15:34:30,894 tornado.application ERROR Uncaught exception GET /ws (192.168.50.10)
+HTTPServerRequest(protocol='http', host='192.168.50.1:8080', method='GET', uri='/ws', version='HTTP/1.1', remote_ip='192.168.50.10')
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/tornado/websocket.py", line 546, in _run_callback
+    result = callback(*args, **kwargs)
+  File "server.py", line 87, in on_message
+    horse_stat = inter.receive()
+  File "/home/pi/Desktop/F76-Therapeutic-Mechanical-Horse/Pi-WS-server/CCInterface.py", line 24, in receive
+    while self.clearCore.in_waiting > 0:
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 467, in in_waiting
+    s = fcntl.ioctl(self.fd, TIOCINQ, TIOCM_zero_str)
+OSError: [Errno 5] Input/output error
+15:34:30,900 asyncio INFO [WS] Connection was closed.
+15:34:30,901 tornado.application ERROR Uncaught exception, closing connection.
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 537, in write
+    n = os.write(self.fd, d)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/tornado/iostream.py", line 752, in wrapper
+    return callback(*args)
+  File "/usr/lib/python3/dist-packages/tornado/stack_context.py", line 300, in null_wrapper
+    return fn(*args, **kwargs)
+  File "/usr/lib/python3/dist-packages/tornado/websocket.py", line 488, in on_connection_close
+    self.on_close()
+  File "server.py", line 98, in on_close
+    inter.send("off_h")
+  File "/home/pi/Desktop/F76-Therapeutic-Mechanical-Horse/Pi-WS-server/CCInterface.py", line 17, in send
+    self.clearCore.write(bytes(message + '\n', 'utf-8'))
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 571, in write
+    raise SerialException('write failed: {}'.format(e))
+serial.serialutil.SerialException: write failed: [Errno 5] Input/output error
+15:34:30,906 tornado.application ERROR Exception in callback functools.partial(<function wrap.<locals>.null_wrapper at 0xb5d40660>)
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 537, in write
+    n = os.write(self.fd, d)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/tornado/ioloop.py", line 758, in _run_callback
+    ret = callback()
+  File "/usr/lib/python3/dist-packages/tornado/stack_context.py", line 300, in null_wrapper
+    return fn(*args, **kwargs)
+  File "/usr/lib/python3/dist-packages/tornado/iostream.py", line 752, in wrapper
+    return callback(*args)
+  File "/usr/lib/python3/dist-packages/tornado/stack_context.py", line 300, in null_wrapper
+    return fn(*args, **kwargs)
+  File "/usr/lib/python3/dist-packages/tornado/websocket.py", line 488, in on_connection_close
+    self.on_close()
+  File "server.py", line 98, in on_close
+    inter.send("off_h")
+  File "/home/pi/Desktop/F76-Therapeutic-Mechanical-Horse/Pi-WS-server/CCInterface.py", line 17, in send
+    self.clearCore.write(bytes(message + '\n', 'utf-8'))
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 571, in write
+    raise SerialException('write failed: {}'.format(e))
+serial.serialutil.SerialException: write failed: [Errno 5] Input/output error
+15:34:32,430 tornado.access INFO 200 GET / (192.168.50.10) 3.07ms
+15:34:32,464 tornado.access INFO 101 GET /ws (192.168.50.10) 1.79ms
+15:34:32,464 asyncio INFO [WS] Connection was opened.
+15:34:34,177 asyncio INFO [WS] Incoming message:stat_h
+15:34:34,178 tornado.application ERROR Uncaught exception GET /ws (192.168.50.10)
+HTTPServerRequest(protocol='http', host='192.168.50.1:8080', method='GET', uri='/ws', version='HTTP/1.1', remote_ip='192.168.50.10')
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/tornado/websocket.py", line 546, in _run_callback
+    result = callback(*args, **kwargs)
+  File "server.py", line 87, in on_message
+    horse_stat = inter.receive()
+  File "/home/pi/Desktop/F76-Therapeutic-Mechanical-Horse/Pi-WS-server/CCInterface.py", line 24, in receive
+    while self.clearCore.in_waiting > 0:
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 467, in in_waiting
+    s = fcntl.ioctl(self.fd, TIOCINQ, TIOCM_zero_str)
+OSError: [Errno 5] Input/output error
+15:34:34,185 asyncio INFO [WS] Connection was closed.
+15:34:34,185 tornado.application ERROR Uncaught exception, closing connection.
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 537, in write
+    n = os.write(self.fd, d)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/tornado/iostream.py", line 752, in wrapper
+    return callback(*args)
+  File "/usr/lib/python3/dist-packages/tornado/stack_context.py", line 300, in null_wrapper
+    return fn(*args, **kwargs)
+  File "/usr/lib/python3/dist-packages/tornado/websocket.py", line 488, in on_connection_close
+    self.on_close()
+  File "server.py", line 98, in on_close
+    inter.send("off_h")
+  File "/home/pi/Desktop/F76-Therapeutic-Mechanical-Horse/Pi-WS-server/CCInterface.py", line 17, in send
+    self.clearCore.write(bytes(message + '\n', 'utf-8'))
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 571, in write
+    raise SerialException('write failed: {}'.format(e))
+serial.serialutil.SerialException: write failed: [Errno 5] Input/output error
+15:34:34,191 tornado.application ERROR Exception in callback functools.partial(<function wrap.<locals>.null_wrapper at 0xb5ca4078>)
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 537, in write
+    n = os.write(self.fd, d)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/tornado/ioloop.py", line 758, in _run_callback
+    ret = callback()
+  File "/usr/lib/python3/dist-packages/tornado/stack_context.py", line 300, in null_wrapper
+    return fn(*args, **kwargs)
+  File "/usr/lib/python3/dist-packages/tornado/iostream.py", line 752, in wrapper
+    return callback(*args)
+  File "/usr/lib/python3/dist-packages/tornado/stack_context.py", line 300, in null_wrapper
+    return fn(*args, **kwargs)
+  File "/usr/lib/python3/dist-packages/tornado/websocket.py", line 488, in on_connection_close
+    self.on_close()
+  File "server.py", line 98, in on_close
+    inter.send("off_h")
+  File "/home/pi/Desktop/F76-Therapeutic-Mechanical-Horse/Pi-WS-server/CCInterface.py", line 17, in send
+    self.clearCore.write(bytes(message + '\n', 'utf-8'))
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 571, in write
+    raise SerialException('write failed: {}'.format(e))
+serial.serialutil.SerialException: write failed: [Errno 5] Input/output error
+15:34:37,765 tornado.access INFO 200 GET / (192.168.50.10) 3.80ms
+15:34:37,796 tornado.access INFO 101 GET /ws (192.168.50.10) 2.08ms
+15:34:37,797 asyncio INFO [WS] Connection was opened.
+15:35:35,492 asyncio INFO [WS] Incoming message:on_h
+15:35:35,493 asyncio INFO Sending on message to horse
+15:35:35,494 tornado.application ERROR Uncaught exception GET /ws (192.168.50.10)
+HTTPServerRequest(protocol='http', host='192.168.50.1:8080', method='GET', uri='/ws', version='HTTP/1.1', remote_ip='192.168.50.10')
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 537, in write
+    n = os.write(self.fd, d)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/tornado/websocket.py", line 546, in _run_callback
+    result = callback(*args, **kwargs)
+  File "server.py", line 65, in on_message
+    inter.send(message)
+  File "/home/pi/Desktop/F76-Therapeutic-Mechanical-Horse/Pi-WS-server/CCInterface.py", line 17, in send
+    self.clearCore.write(bytes(message + '\n', 'utf-8'))
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 571, in write
+    raise SerialException('write failed: {}'.format(e))
+serial.serialutil.SerialException: write failed: [Errno 5] Input/output error
+15:35:35,501 asyncio INFO [WS] Connection was closed.
+15:35:35,501 tornado.application ERROR Uncaught exception, closing connection.
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 537, in write
+    n = os.write(self.fd, d)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/tornado/iostream.py", line 752, in wrapper
+    return callback(*args)
+  File "/usr/lib/python3/dist-packages/tornado/stack_context.py", line 300, in null_wrapper
+    return fn(*args, **kwargs)
+  File "/usr/lib/python3/dist-packages/tornado/websocket.py", line 488, in on_connection_close
+    self.on_close()
+  File "server.py", line 98, in on_close
+    inter.send("off_h")
+  File "/home/pi/Desktop/F76-Therapeutic-Mechanical-Horse/Pi-WS-server/CCInterface.py", line 17, in send
+    self.clearCore.write(bytes(message + '\n', 'utf-8'))
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 571, in write
+    raise SerialException('write failed: {}'.format(e))
+serial.serialutil.SerialException: write failed: [Errno 5] Input/output error
+15:35:35,508 tornado.application ERROR Exception in callback functools.partial(<function wrap.<locals>.null_wrapper at 0xb5d40588>)
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 537, in write
+    n = os.write(self.fd, d)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/tornado/ioloop.py", line 758, in _run_callback
+    ret = callback()
+  File "/usr/lib/python3/dist-packages/tornado/stack_context.py", line 300, in null_wrapper
+    return fn(*args, **kwargs)
+  File "/usr/lib/python3/dist-packages/tornado/iostream.py", line 752, in wrapper
+    return callback(*args)
+  File "/usr/lib/python3/dist-packages/tornado/stack_context.py", line 300, in null_wrapper
+    return fn(*args, **kwargs)
+  File "/usr/lib/python3/dist-packages/tornado/websocket.py", line 488, in on_connection_close
+    self.on_close()
+  File "server.py", line 98, in on_close
+    inter.send("off_h")
+  File "/home/pi/Desktop/F76-Therapeutic-Mechanical-Horse/Pi-WS-server/CCInterface.py", line 17, in send
+    self.clearCore.write(bytes(message + '\n', 'utf-8'))
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 571, in write
+    raise SerialException('write failed: {}'.format(e))
+serial.serialutil.SerialException: write failed: [Errno 5] Input/output error
+15:35:38,823 tornado.access INFO 200 GET / (192.168.50.10) 3.79ms
+15:35:38,852 tornado.access INFO 101 GET /ws (192.168.50.10) 1.87ms
+15:35:38,853 asyncio INFO [WS] Connection was opened.
+15:35:47,730 asyncio INFO [WS] Connection was closed.
+15:35:47,731 tornado.application ERROR Uncaught exception, closing connection.
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 537, in write
+    n = os.write(self.fd, d)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/tornado/iostream.py", line 752, in wrapper
+    return callback(*args)
+  File "/usr/lib/python3/dist-packages/tornado/stack_context.py", line 300, in null_wrapper
+    return fn(*args, **kwargs)
+  File "/usr/lib/python3/dist-packages/tornado/websocket.py", line 488, in on_connection_close
+    self.on_close()
+  File "server.py", line 98, in on_close
+    inter.send("off_h")
+  File "/home/pi/Desktop/F76-Therapeutic-Mechanical-Horse/Pi-WS-server/CCInterface.py", line 17, in send
+    self.clearCore.write(bytes(message + '\n', 'utf-8'))
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 571, in write
+    raise SerialException('write failed: {}'.format(e))
+serial.serialutil.SerialException: write failed: [Errno 5] Input/output error
+15:35:47,738 tornado.application ERROR Exception in callback functools.partial(<function wrap.<locals>.null_wrapper at 0xb5d2a348>)
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 537, in write
+    n = os.write(self.fd, d)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/tornado/ioloop.py", line 758, in _run_callback
+    ret = callback()
+  File "/usr/lib/python3/dist-packages/tornado/stack_context.py", line 300, in null_wrapper
+    return fn(*args, **kwargs)
+  File "/usr/lib/python3/dist-packages/tornado/iostream.py", line 752, in wrapper
+    return callback(*args)
+  File "/usr/lib/python3/dist-packages/tornado/stack_context.py", line 300, in null_wrapper
+    return fn(*args, **kwargs)
+  File "/usr/lib/python3/dist-packages/tornado/websocket.py", line 488, in on_connection_close
+    self.on_close()
+  File "server.py", line 98, in on_close
+    inter.send("off_h")
+  File "/home/pi/Desktop/F76-Therapeutic-Mechanical-Horse/Pi-WS-server/CCInterface.py", line 17, in send
+    self.clearCore.write(bytes(message + '\n', 'utf-8'))
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 571, in write
+    raise SerialException('write failed: {}'.format(e))
+serial.serialutil.SerialException: write failed: [Errno 5] Input/output error
+15:35:59,443 tornado.access INFO 200 GET / (192.168.50.10) 3.76ms
+15:35:59,467 tornado.access INFO 200 GET /static/ws-client.js?v=5915ae617a8b0f0eac1268726e031ca0 (192.168.50.10) 5.23ms
+15:35:59,474 tornado.access INFO 200 GET /static/jquery-1.8.3.min.js?v=24bd97b1de158c4f1a162336eeca4aa6 (192.168.50.10) 23.38ms
+15:35:59,528 tornado.access INFO 101 GET /ws (192.168.50.10) 2.18ms
+15:35:59,529 asyncio INFO [WS] Connection was opened.
+15:35:59,543 tornado.access WARNING 404 GET /favicon.ico (192.168.50.10) 1.55ms
